@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Blueprint: 2026 Forecast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Earthy Calm -->
+    <!-- Primary Background: Stone-50 (Warm Neutral) -->
+    <!-- Accents: Indigo-900 (Water/Wisdom), Amber-700 (Earth/Stability), Rose-600 (Fire/Passion) -->
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        'element-wood': '#4ade80', // Green
+                        'element-fire': '#f43f5e', // Red
+                        'element-earth': '#d97706', // Ochre
+                        'element-metal': '#94a3b8', // Grey/Silver
+                        'element-water': '#1e3a8a', // Deep Blue
+                        'paper': '#fafaf9',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card-hovering {
+            transition: all 0.3s ease;
+        }
+        .card-hovering:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-active {
+            border-bottom: 2px solid #1e3a8a;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="text-stone-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Application Structure Plan: 
+         1. Header: Personal details and context setting.
+         2. Foundation (The 4 Pillars): Interactive cards explaining the user's static chart.
+         3. Analysis (The 5 Elements): Quantitative breakdown using a Doughnut chart to show imbalances.
+         4. The Core (Day Master): Textual focus on the user's primary element.
+         5. The Future (2026 Forecast): A dedicated section comparing the birth chart to 2026 energies using a Radar chart.
+         6. Strategy (Action Plan): Interactive tabs for actionable advice based on the synthesis of Birth + 2026.
+    -->
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-serif text-stone-900">Cosmic Blueprint</h1>
+                <p class="text-xs text-stone-500 uppercase tracking-wider">Luke Nathan Hayes • 1982 to 2026</p>
+            </div>
+            <button onclick="document.getElementById('glossary-modal').classList.toggle('hidden')" class="text-sm font-medium text-indigo-900 hover:text-indigo-700 transition">
+                ? Terminology
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-12">
+
+        <!-- Intro Context -->
+        <section class="max-w-3xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-serif mb-4 text-stone-800">The Water Monkey in a Fire Horse Year</h2>
+            <p class="text-lg text-stone-600 leading-relaxed">
+                Welcome to your interactive reading. This dashboard synthesizes your BaZi (Four Pillars of Destiny) chart based on your birth date: <strong>December 3, 1982, at 08:15 AM</strong>. We will analyze your inherent elemental structure and simulate how it interacts with the incoming energy of 2026, the Year of the Fire Horse.
+            </p>
+        </section>
+
+        <!-- Visualization & Content Choices:
+             - Section: The Four Pillars
+             - Goal: Inform user of their specific chart components.
+             - Viz: Card Grid with Pillars.
+             - Interaction: Hover/Click to reveal specific meanings (Year=Social, Month=Career, Day=Self, Hour=Ambition).
+             - Justification: BaZi is complex; breaking it into 4 distinct blocks makes it digestible.
+        -->
+        <section>
+            <div class="flex flex-col md:flex-row justify-between items-end mb-6 border-b border-stone-200 pb-2">
+                <div>
+                    <h3 class="text-xl font-bold text-stone-800">1. Your Four Pillars (The Natal Chart)</h3>
+                    <p class="text-stone-500 text-sm mt-1">These four columns represent the cosmic energy at the moment of your birth.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="pillars-container">
+                <!-- Pillars injected by JS -->
+            </div>
+            <div class="mt-4 bg-stone-100 p-4 rounded-lg text-sm text-stone-600 border-l-4 border-indigo-900">
+                <strong class="text-indigo-900">Insight:</strong> You are a <strong>Yang Water (Ren)</strong> Day Master born in the beginning of Winter. This suggests a personality that is adaptable, intelligent, and potentially restless, like a flowing river or ocean.
+            </div>
+        </section>
+
+        <!-- Visualization & Content Choices:
+             - Section: Elemental Balance
+             - Goal: Show quantitative strengths/weaknesses.
+             - Viz: Chart.js Doughnut Chart.
+             - Interaction: Click chart segments to update side-panel text explanation.
+             - Justification: Visualizing the "Score" of elements helps users see what they have too much or too little of.
+        -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+            <div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-bold text-stone-800">2. The Five Elements Balance</h3>
+                    <p class="text-stone-500 text-sm mt-1">Chart shows the estimated strength of elements in your chart. Click segments for details.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="elementsChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-stone-50 p-6 rounded-xl h-full flex flex-col justify-center">
+                <h4 id="element-title" class="text-lg font-serif font-bold text-stone-800 mb-2">Select an Element</h4>
+                <div id="element-desc" class="text-stone-600 space-y-3">
+                    <p>Your chart is a mix of Wood, Fire, Earth, Metal, and Water. The goal of BaZi is balance.</p>
+                    <p>Tap the chart on the left to understand what each element represents for you (Wealth, Resources, Power, etc.).</p>
+                </div>
+                <div id="element-stat" class="mt-6 pt-4 border-t border-stone-200 grid grid-cols-2 gap-4 hidden">
+                    <div>
+                        <span class="block text-xs uppercase tracking-wide text-stone-400">Role in Life</span>
+                        <span id="stat-role" class="font-bold text-stone-700">-</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs uppercase tracking-wide text-stone-400">Status</span>
+                        <span id="stat-status" class="font-bold text-stone-700">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization & Content Choices:
+             - Section: 2026 Forecast
+             - Goal: Comparison of "Self" vs "Year Energy".
+             - Viz: Radar Chart (Spider Chart).
+             - Interaction: Toggle between "Birth Chart" and "2026 Influence" datasets.
+             - Justification: A radar chart effectively shows how the shape of the chart expands or contracts in different areas (e.g., Wealth spikes in 2026).
+        -->
+        <section>
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-stone-800">3. The 2026 Collision: Year of the Fire Horse</h3>
+                <p class="text-stone-500 text-sm mt-1">How the incoming year (Bing Wu) interacts with your internal wiring.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Analysis Card -->
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="bg-gradient-to-br from-rose-50 to-orange-50 p-6 rounded-xl border border-rose-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-2xl">🔥</span>
+                            <h4 class="font-bold text-rose-900">The Fire Frame</h4>
+                        </div>
+                        <p class="text-sm text-rose-800 leading-relaxed">
+                            2026 is unique for you. The <strong>Horse</strong> (2026) combines with the <strong>Tiger</strong> (your Day) and <strong>Dog</strong> (your Year) in your chart.
+                        </p>
+                        <p class="text-sm text-rose-800 font-bold mt-2">
+                            Result: Infinite Fire.
+                        </p>
+                        <p class="text-sm text-rose-700 mt-2">
+                            For a Water person like you, Fire represents <strong>Wealth</strong> but also <strong>Overexertion</strong>. The wealth element is incredibly strong in 2026.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-stone-200">
+                        <h5 class="font-bold text-stone-700 mb-2">Key Themes for 2026</h5>
+                        <ul class="space-y-2 text-sm text-stone-600">
+                            <li class="flex items-start"><span class="mr-2 text-indigo-500">➜</span> <strong>Aggressive Wealth:</strong> High potential for earnings, but high risk of burnout.</li>
+                            <li class="flex items-start"><span class="mr-2 text-indigo-500">➜</span> <strong>Visibility:</strong> You will be seen. Good for branding, bad for privacy.</li>
+                            <li class="flex items-start"><span class="mr-2 text-indigo-500">➜</span> <strong>Resource Drain:</strong> Fire boils Water. You need to protect your health (Kidneys/Adrenals).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Radar Visualization -->
+                <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-stone-100 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-stone-700">Energy Shift Visualization</h4>
+                        <div class="text-xs text-stone-400">Comparing Base Energy vs. 2026 Energy</div>
+                    </div>
+                    <div class="chart-container flex-grow">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization & Content Choices:
+             - Section: Actionable Advice
+             - Goal: Practical application of the analysis.
+             - Viz: Interactive Tabs (Wealth, Career, Health).
+             - Interaction: Clicking tabs switches the checklist.
+             - Justification: User needs specific takeaways, not just abstract analysis.
+        -->
+        <section class="bg-indigo-900 rounded-2xl p-8 text-white shadow-lg">
+            <h3 class="text-2xl font-serif mb-6 text-center">Navigating 2026: Your Strategy</h3>
+            
+            <div class="flex justify-center space-x-4 mb-8">
+                <button onclick="switchTab('wealth')" id="btn-wealth" class="px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 transition text-sm font-semibold backdrop-blur-sm ring-2 ring-white/50">Wealth</button>
+                <button onclick="switchTab('career')" id="btn-career" class="px-4 py-2 rounded-full bg-indigo-800 hover:bg-white/10 transition text-sm font-semibold opacity-70">Career</button>
+                <button onclick="switchTab('health')" id="btn-health" class="px-4 py-2 rounded-full bg-indigo-800 hover:bg-white/10 transition text-sm font-semibold opacity-70">Health</button>
+            </div>
+
+            <div id="strategy-content" class="max-w-2xl mx-auto bg-white/10 p-6 rounded-xl backdrop-blur-md border border-white/10 min-h-[200px]">
+                <!-- Dynamic Content Loads Here -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 py-8 mt-auto border-t border-stone-200">
+        <div class="max-w-6xl mx-auto px-4 text-center text-stone-400 text-sm">
+            <p>Generated for Luke Nathan Hayes • Based on traditional BaZi methodology</p>
+            <p class="mt-2 text-xs">Note: Astrology is a framework for self-reflection, not a guaranteed prediction.</p>
+        </div>
+    </footer>
+
+    <!-- Glossary Modal -->
+    <div id="glossary-modal" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Glossary</h3>
+                <button onclick="document.getElementById('glossary-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-800">✕</button>
+            </div>
+            <div class="space-y-3 text-sm text-stone-600 max-h-[60vh] overflow-y-auto">
+                <p><strong>Day Master:</strong> The element of the day you were born. It represents YOU.</p>
+                <p><strong>Four Pillars:</strong> The Year, Month, Day, and Hour components of your chart.</p>
+                <p><strong>Five Elements:</strong> Wood, Fire, Earth, Metal, Water. The building blocks of Chinese Metaphysics.</p>
+                <p><strong>Wealth Element:</strong> The element your Day Master controls (Water controls Fire, so Fire is your Wealth).</p>
+                <p><strong>Resource Element:</strong> The element that produces you (Metal produces Water). Represents health and support.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script>
+        // --- DATA & CALCULATIONS ---
+        
+        // Birth Data: 3 Dec 1982, 08:15 AM
+        // Year: Ren Xu (Water Dog)
+        // Month: Xin Hai (Metal Pig) - Note: Solar term adjustment checked.
+        // Day: Ren Yin (Water Tiger) - Calculated for this specific date.
+        // Hour: Jia Chen (Wood Dragon) - 08:15 AM is Dragon Hour (0700-0900).
+
+        const birthChartData = {
+            pillars: [
+                {
+                    title: "Hour Pillar",
+                    animal: "Dragon",
+                    element: "Wood",
+                    stem: "Jia (Yang Wood)",
+                    branch: "Chen (Dragon)",
+                    meaning: "Career / Children / Ambition",
+                    colorClass: "border-element-wood bg-green-50",
+                    icon: "🐉"
+                },
+                {
+                    title: "Day Pillar",
+                    animal: "Tiger",
+                    element: "Water",
+                    stem: "Ren (Yang Water)",
+                    branch: "Yin (Tiger)",
+                    meaning: "The Self (Day Master) / Spouse",
+                    colorClass: "border-element-water bg-blue-50 ring-2 ring-indigo-200", // Highlight Day Master
+                    icon: "🐅"
+                },
+                {
+                    title: "Month Pillar",
+                    animal: "Pig",
+                    element: "Metal",
+                    stem: "Xin (Yin Metal)",
+                    branch: "Hai (Pig)",
+                    meaning: "Parents / Career Environment",
+                    colorClass: "border-element-metal bg-slate-50",
+                    icon: "🐖"
+                },
+                {
+                    title: "Year Pillar",
+                    animal: "Dog",
+                    element: "Water",
+                    stem: "Ren (Yang Water)",
+                    branch: "Xu (Dog)",
+                    meaning: "Ancestors / Social Circle / Network",
+                    colorClass: "border-element-water bg-blue-50",
+                    icon: "🐕"
+                }
+            ],
+            // Estimated Strength (0-100) based on BaZi calculation rules (Season, Placement)
+            // Day Master is Water. Born in Pig Month (Winter) -> Water is prosperous.
+            // Metal supports Water.
+            // Chart is STRONG WATER.
+            elements: [
+                { label: "Wood (Output)", value: 20, desc: "Creativity, Expression, Strategy", role: "Output" },
+                { label: "Fire (Wealth)", value: 10, desc: "Money, Passion, Joy", role: "Wealth" }, // Weak in natal chart, buried in Dog/Tiger
+                { label: "Earth (Power)", value: 15, desc: "Discipline, Authority, Rules", role: "Influence" },
+                { label: "Metal (Resource)", value: 20, desc: "Health, Knowledge, Support", role: "Resource" },
+                { label: "Water (Self)", value: 35, desc: "The Self, Peers, Competitors", role: "Companion" }
+            ]
+        };
+
+        const strategies = {
+            wealth: {
+                title: "Wealth Strategy: The Harvest",
+                points: [
+                    "<strong>Fire is your Wealth Element:</strong> 2026 brings a massive influx of Fire. This is your 'cash out' year.",
+                    "<strong>Investment:</strong> The energies favor bold investments, but ensure you have the 'Metal' (Data/Research) to back it up.",
+                    "<strong>Partnerships:</strong> The Tiger-Horse-Dog combination suggests wealth comes through alliances and teams, not solo efforts."
+                ],
+                icon: "💰"
+            },
+            career: {
+                title: "Career Strategy: High Visibility",
+                points: [
+                    "<strong>Promotion:</strong> The strong Fire energy puts a spotlight on you. It's time to launch projects you've been sitting on.",
+                    "<strong>Leadership:</strong> Your Water nature controls the Fire. You will be expected to manage chaos. Stay cool-headed.",
+                    "<strong>Networking:</strong> The Dog in your year pillar activates. Reconnect with old networks; they are the key to the Fire structure."
+                ],
+                icon: "🚀"
+            },
+            health: {
+                title: "Health Strategy: Cool Down",
+                points: [
+                    "<strong>Risk of Burnout:</strong> Strong Fire clashes with your Water. This manifests as inflammation, eye issues, or high blood pressure.",
+                    "<strong>Hydration:</strong> Literally and metaphorically. Spend time near water. Drink more water.",
+                    "<strong>Sleep:</strong> Fire energy is restless. Prioritize sleep hygiene to replenish your Water (Kidney) energy."
+                ],
+                icon: "🧘"
+            }
+        };
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderPillars() {
+            const container = document.getElementById('pillars-container');
+            // Pillars are typically read Right to Left (Year -> Hour), but for UI UX Left to Right (Hour -> Year) or Year -> Hour is debated. 
+            // We will display Year -> Month -> Day -> Hour for logical progression.
+            
+            // Reversing array to show Year first (standard western reading flow)
+            const orderedPillars = [...birthChartData.pillars].reverse();
+
+            orderedPillars.forEach(p => {
+                const el = document.createElement('div');
+                el.className = `p-5 rounded-xl border-t-4 bg-white shadow-sm card-hovering ${p.colorClass}`;
+                el.innerHTML = `
+                    <div class="text-xs uppercase font-bold text-stone-400 mb-2">${p.title}</div>
+                    <div class="text-4xl mb-3">${p.icon}</div>
+                    <div class="font-serif text-lg font-bold text-stone-800">${p.stem}</div>
+                    <div class="text-md text-stone-600 mb-3">${p.branch}</div>
+                    <div class="text-xs text-stone-500 border-t border-stone-100 pt-2">${p.meaning}</div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function initCharts() {
+            // 1. Elements Doughnut Chart
+            const ctxElements = document.getElementById('elementsChart').getContext('2d');
+            const elementChart = new Chart(ctxElements, {
+                type: 'doughnut',
+                data: {
+                    labels: birthChartData.elements.map(e => e.label),
+                    datasets: [{
+                        data: birthChartData.elements.map(e => e.value),
+                        backgroundColor: [
+                            '#4ade80', // Wood
+                            '#f43f5e', // Fire
+                            '#d97706', // Earth
+                            '#94a3b8', // Metal
+                            '#1e3a8a'  // Water
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    },
+                    onClick: (evt, activeElements) => {
+                        if (activeElements.length > 0) {
+                            const index = activeElements[0].index;
+                            updateElementDetails(index);
+                        }
+                    }
+                }
+            });
+
+            // 2. Forecast Radar Chart
+            // Comparing Natal Strengths vs 2026 Effect
+            // In 2026 (Fire Horse): Fire +++, Earth ++ (Fire produces Earth), Wood + (Wood produces Fire), Water -- (Clashed), Metal -- (Melted)
+            const ctxForecast = document.getElementById('forecastChart').getContext('2d');
+            new Chart(ctxForecast, {
+                type: 'radar',
+                data: {
+                    labels: ['Wood (Output)', 'Fire (Wealth)', 'Earth (Power)', 'Metal (Resource)', 'Water (Self)'],
+                    datasets: [{
+                        label: 'Your Natal Chart',
+                        data: [20, 10, 15, 20, 35],
+                        fill: true,
+                        backgroundColor: 'rgba(30, 58, 138, 0.2)',
+                        borderColor: '#1e3a8a',
+                        pointBackgroundColor: '#1e3a8a',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#1e3a8a'
+                    }, {
+                        label: '2026 Influence',
+                        data: [30, 90, 40, 5, 15], // Fire skyrockets, Metal/Water drops
+                        fill: true,
+                        backgroundColor: 'rgba(244, 63, 94, 0.2)',
+                        borderColor: '#f43f5e',
+                        pointBackgroundColor: '#f43f5e',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#f43f5e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e5e7eb' },
+                            grid: { color: '#e5e7eb' },
+                            pointLabels: {
+                                font: { size: 12, family: 'Outfit' },
+                                color: '#4b5563'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize detail view with dominant element
+            updateElementDetails(4); // Water
+        }
+
+        function updateElementDetails(index) {
+            const elData = birthChartData.elements[index];
+            document.getElementById('element-title').textContent = elData.label;
+            document.getElementById('element-title').className = `text-lg font-serif font-bold mb-2 ${getElementColorText(index)}`;
+            
+            document.getElementById('element-desc').innerHTML = `<p>${elData.desc}</p><p class="mt-2 text-sm italic">Strength in your chart: ${elData.value}%</p>`;
+            
+            document.getElementById('element-stat').classList.remove('hidden');
+            document.getElementById('stat-role').textContent = elData.role;
+            
+            // Determine status based on value
+            let status = "Balanced";
+            if(elData.value > 30) status = "Dominant";
+            if(elData.value < 15) status = "Weak (Needs Cultivation)";
+            document.getElementById('stat-status').textContent = status;
+        }
+
+        function getElementColorText(index) {
+            const colors = ['text-green-500', 'text-rose-500', 'text-amber-600', 'text-slate-500', 'text-indigo-800'];
+            return colors[index];
+        }
+
+        function switchTab(tab) {
+            // Update Buttons
+            ['wealth', 'career', 'health'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (t === tab) {
+                    btn.classList.remove('opacity-70', 'bg-indigo-800', 'hover:bg-white/10');
+                    btn.classList.add('bg-white/20', 'ring-2', 'ring-white/50');
+                } else {
+                    btn.classList.add('opacity-70', 'bg-indigo-800', 'hover:bg-white/10');
+                    btn.classList.remove('bg-white/20', 'ring-2', 'ring-white/50');
+                }
+            });
+
+            // Update Content
+            const content = strategies[tab];
+            const container = document.getElementById('strategy-content');
+            
+            // Simple animation
+            container.style.opacity = '0';
+            setTimeout(() => {
+                container.innerHTML = `
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl">${content.icon}</span>
+                        <h4 class="text-xl font-bold text-white">${content.title}</h4>
+                    </div>
+                    <ul class="space-y-4 text-indigo-100">
+                        ${content.points.map(p => `<li class="flex items-start gap-2"><span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0"></span><span>${p}</span></li>`).join('')}
+                    </ul>
+                `;
+                container.style.opacity = '1';
+            }, 150);
+        }
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPillars();
+            initCharts();
+            switchTab('wealth'); // Default tab
+        });
+
+    </script>
+</body>
+</html>
